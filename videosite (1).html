@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FORTVID — Vidéothèque</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Burbank+Big+Condensed:wght@700&family=Russo+One&family=Rajdhani:wght@400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Russo+One&family=Rajdhani:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg: #0d1b2e;
+    --bg2: #0a1520;
+    --surface: #112035;
+    --surface2: #162843;
+    --border: #1e3a5f;
+    --border-bright: #2e6aad;
+    --blue: #00c8ff;
+    --blue2: #0099cc;
+    --gold: #ffd700;
+    --gold2: #ffaa00;
+    --purple: #7b2fff;
+    --green: #00ff88;
+    --text: #e8f4ff;
+    --muted: #4a7399;
+    --rarity-common: #888;
+    --rarity-rare: #4d9eff;
+    --rarity-epic: #a855f7;
+    --rarity-legendary: #f59e0b;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Rajdhani', sans-serif;
+    background: var(--bg2);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* ANIMATED GRID BACKGROUND */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,200,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,200,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    animation: gridMove 20s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(0,120,255,0.15) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  @keyframes gridMove {
+    0% { background-position: 0 0; }
+    100% { background-position: 40px 40px; }
+  }
+
+  /* HEADER */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    background: linear-gradient(180deg, rgba(10,21,32,0.98) 0%, rgba(10,21,32,0.92) 100%);
+    backdrop-filter: blur(16px);
+    border-bottom: 2px solid var(--border-bright);
+    box-shadow: 0 0 40px rgba(0,150,255,0.15), inset 0 -1px 0 rgba(0,200,255,0.2);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 70px;
+  }
+
+  .logo-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--blue) 0%, var(--purple) 100%);
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 10px rgba(0,200,255,0.4); }
+    50% { box-shadow: 0 0 25px rgba(0,200,255,0.8), 0 0 50px rgba(123,47,255,0.4); }
+  }
+
+  .logo {
+    font-family: 'Russo One', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 0.08em;
+    background: linear-gradient(90deg, var(--blue) 0%, #fff 50%, var(--gold) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none;
+    filter: drop-shadow(0 0 8px rgba(0,200,255,0.5));
+  }
+
+  .logo-sub {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-top: -4px;
+  }
+
+  /* BUTTONS */
+  .btn {
+    font-family: 'Russo One', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    padding: 10px 22px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    position: relative;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+  }
+
+  .btn-upload {
+    background: linear-gradient(135deg, var(--blue) 0%, var(--purple) 100%);
+    color: #fff;
+    font-size: 0.8rem;
+    padding: 12px 28px;
+    box-shadow: 0 0 20px rgba(0,200,255,0.3);
+  }
+
+  .btn-upload:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 30px rgba(0,200,255,0.6), 0 4px 20px rgba(0,0,0,0.4);
+  }
+
+  .btn-upload:active { transform: translateY(0); }
+
+  .btn-confirm {
+    background: linear-gradient(135deg, var(--gold2) 0%, var(--gold) 100%);
+    color: #000;
+    font-weight: 900;
+    width: 100%;
+    padding: 14px;
+    font-size: 0.9rem;
+    margin-top: 8px;
+    clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
+  }
+
+  .btn-confirm:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 30px rgba(255,215,0,0.5);
+  }
+
+  .btn-danger {
+    background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
+    color: #fff;
+    font-size: 0.7rem;
+    padding: 8px 18px;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+  }
+
+  .btn-danger:hover { box-shadow: 0 0 20px rgba(255,0,0,0.4); }
+
+  /* SEASON BAR */
+  .season-bar {
+    background: linear-gradient(90deg, #0d1b2e 0%, #162843 20%, #1e3a5f 50%, #162843 80%, #0d1b2e 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    z-index: 1;
+  }
+
+  .season-badge {
+    font-family: 'Russo One', sans-serif;
+    font-size: 0.7rem;
+    color: var(--gold);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .season-badge::before {
+    content: '★';
+    color: var(--gold);
+    animation: spin 4s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* XP BAR */
+  .xp-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .xp-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  .xp-bar {
+    width: 200px;
+    height: 8px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    position: relative;
+    clip-path: polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%);
+  }
+
+  .xp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--blue) 0%, var(--purple) 100%);
+    width: 0%;
+    transition: width 1s ease;
+    box-shadow: 0 0 8px var(--blue);
+  }
+
+  .xp-val {
+    font-family: 'Russo One', sans-serif;
+    font-size: 0.65rem;
+    color: var(--blue);
+  }
+
+  /* MAIN */
+  main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 32px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* STATS CARDS */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 48px;
+  }
+
+  .stat-card {
+    background: linear-gradient(135deg, var(--surface) 0%, var(--surface2) 100%);
+    border: 1px solid var(--border);
+    padding: 20px 24px;
+    position: relative;
+    overflow: hidden;
+    clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--blue), transparent);
+    animation: scanline 3s ease-in-out infinite;
+  }
+
+  @keyframes scanline {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+
+  .stat-icon {
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .stat-value {
+    font-family: 'Russo One', sans-serif;
+    font-size: 2.2rem;
+    line-height: 1;
+    background: linear-gradient(135deg, var(--blue) 0%, #fff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 4px;
+  }
+
+  .stat-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  /* SECTION HEADER */
+  .section-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 16px;
+  }
+
+  .section-title {
+    font-family: 'Russo One', sans-serif;
+    font-size: 2.4rem;
+    letter-spacing: 0.05em;
+    background: linear-gradient(90deg, #fff 0%, var(--blue) 60%, var(--gold) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    filter: drop-shadow(0 0 12px rgba(0,200,255,0.3));
+  }
+
+  .section-count {
+    font-family: 'Russo One', sans-serif;
+    font-size: 0.8rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    padding-bottom: 4px;
+  }
+
+  /* VIDEO GRID */
+  .video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+
+  /* VIDEO CARD — Fortnite item shop style */
+  .video-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.25s ease;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+    animation: cardIn 0.4s ease both;
+  }
+
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(20px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .video-card:nth-child(1) { animation-delay: 0.05s; }
+  .video-card:nth-child(2) { animation-delay: 0.1s; }
+  .video-card:nth-child(3) { animation-delay: 0.15s; }
+  .video-card:nth-child(4) { animation-delay: 0.2s; }
+
+  .video-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(0,200,255,0.05) 0%, transparent 50%);
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .video-card:hover {
+    border-color: var(--blue);
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 8px 40px rgba(0,150,255,0.3), 0 0 0 1px rgba(0,200,255,0.3);
+  }
+
+  .video-card:hover .card-shine { opacity: 1; }
+  .video-card:hover .thumb-img { transform: scale(1.06); }
+
+  .card-shine {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  /* RARITY STRIPE */
+  .rarity-stripe {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    z-index: 3;
+  }
+
+  /* THUMB */
+  .thumb-wrap {
+    position: relative;
+    aspect-ratio: 16/9;
+    overflow: hidden;
+    background: #071525;
+  }
+
+  .thumb-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+    display: block;
+  }
+
+  .thumb-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #071525 0%, #0d1b2e 100%);
+  }
+
+  .thumb-placeholder svg { opacity: 0.15; width: 52px; }
+
+  .play-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(0,50,100,0.7) 0%, rgba(123,47,255,0.4) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.25s;
+    z-index: 2;
+  }
+
+  .video-card:hover .play-overlay { opacity: 1; }
+
+  .play-btn-circle {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--blue) 0%, var(--purple) 100%);
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 30px rgba(0,200,255,0.6);
+    animation: hexPulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes hexPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+  }
+
+  .play-btn-circle svg { margin-left: 5px; }
+
+  .duration-badge {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: rgba(0,0,0,0.8);
+    font-family: 'Russo One', sans-serif;
+    font-size: 0.6rem;
+    padding: 3px 8px;
+    color: #fff;
+    letter-spacing: 0.05em;
+    z-index: 3;
+    clip-path: polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%);
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+
+  .size-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-family: 'Russo One', sans-serif;
+    font-size: 0.55rem;
+    padding: 3px 8px;
+    color: #000;
+    letter-spacing: 0.05em;
+    z-index: 3;
+    clip-path: polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%);
+  }
+
+  /* CARD BODY */
+  .card-body {
+    padding: 14px 16px;
+    background: linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
+    position: relative;
+  }
+
+  .card-title {
+    font-family: 'Russo One', sans-serif;
+    font-size: 0.9rem;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 6px;
+    color: #fff;
+  }
+
+  .card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .card-date {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.7rem;
+    color: var(--muted);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+
+  .card-type-badge {
+    font-family: 'Russo One', sans-serif;
+    font-size: 0.55rem;
+    padding: 2px 8px;
+    letter-spacing: 0.08em;
+    clip-path: polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%);
+  }
+
+  /* RARITY COLORS */
+  .rarity-common .rarity-stripe { background: var(--rarity-common); }
+  .rarity-common .size-badge { background: var(--rarity-common); }
+  .rarity-common .card-type-badge { background: var(--rarity-common); color: #fff; }
+
+  .rarity-rare .rarity-stripe { background: var(--rarity-rare); }
+  .rarity-rare .size-badge { background: var(--rarity-rare); }
+  .rarity-rare .card-type-badge { background: var(--rarity-rare); color: #fff; }
+
+  .rarity-epic .rarity-stripe { background: var(--rarity-epic); box-shadow: 0 0 8px var(--rarity-epic); }
+  .rarity-epic .size-badge { background: var(--rarity-epic); }
+  .rarity-epic .card-type-badge { background: var(--rarity-epic); color: #fff; }
+
+  .rarity-legendary .rarity-stripe { background: linear-gradient(180deg, var(--gold) 0%, var(--gold2) 100%); box-shadow: 0 0 12px var(--gold); }
+  .rarity-legendary .size-badge { background: var(--gold); }
+  .rarity-legendary .card-type-badge { background: linear-gradient(90deg, var(--gold2) 0%, var(--gold) 100%); color: #000; }
+  .rarity-legendary { border-color: rgba(255,215,0,0.4); }
+  .rarity-legendary:hover { box-shadow: 0 8px 40px rgba(255,165,0,0.4), 0 0 0 1px rgba(255,215,0,0.4); }
+
+  /* EMPTY STATE */
+  .empty-state {
+    grid-column: 1/-1;
+    padding: 80px 40px;
+    text-align: center;
+    border: 2px dashed var(--border);
+    background: rgba(255,255,255,0.01);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .empty-state::before {
+    content: '🎮';
+    position: absolute;
+    font-size: 8rem;
+    opacity: 0.04;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .empty-state h3 {
+    font-family: 'Russo One', sans-serif;
+    font-size: 1.8rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+  }
+
+  .empty-state p {
+    font-size: 0.9rem;
+    color: var(--muted);
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── MODALS ── */
+  .modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(5,15,30,0.92);
+    z-index: 500;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(6px);
+  }
+
+  .modal-backdrop.open { display: flex; }
+
+  .modal {
+    background: linear-gradient(135deg, #0d1b2e 0%, #112035 100%);
+    border: 1px solid var(--border-bright);
+    width: 90%;
+    max-width: 500px;
+    padding: 36px;
+    position: relative;
+    animation: modalIn 0.25s ease both;
+    clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
+    box-shadow: 0 0 60px rgba(0,100,255,0.2), inset 0 0 40px rgba(0,50,100,0.1);
+  }
+
+  /* Animated border glow */
+  .modal::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    background: linear-gradient(135deg, var(--blue), transparent, var(--purple), transparent, var(--blue));
+    background-size: 300% 300%;
+    animation: borderAnim 4s linear infinite;
+    z-index: -1;
+    clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
+  }
+
+  @keyframes borderAnim {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(0.93) translateY(16px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 14px; right: 14px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 1rem;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    clip-path: polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%);
+  }
+
+  .modal-close:hover { background: rgba(255,0,0,0.2); border-color: #ff4444; color: #ff4444; }
+
+  .modal-icon { font-size: 2.5rem; margin-bottom: 8px; }
+
+  .modal-title {
+    font-family: 'Russo One', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 0.06em;
+    background: linear-gradient(90deg, #fff 0%, var(--blue) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 4px;
+  }
+
+  .modal-sub {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+
+  /* FORM */
+  .form-group { margin-bottom: 16px; }
+
+  .form-group label {
+    display: block;
+    font-family: 'Russo One', sans-serif;
+    font-size: 0.65rem;
+    color: var(--blue);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .form-group input {
+    width: 100%;
+    background: rgba(0,200,255,0.04);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--blue);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    clip-path: polygon(0 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+  }
+
+  .form-group input:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 20px rgba(0,200,255,0.15);
+    background: rgba(0,200,255,0.07);
+  }
+
+  .form-group input::placeholder { color: var(--muted); }
+
+  /* UPLOAD ZONE */
+  .upload-zone {
+    border: 2px dashed var(--border-bright);
+    padding: 32px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s;
+    margin-bottom: 16px;
+    position: relative;
+    background: rgba(0,200,255,0.02);
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+  }
+
+  .upload-zone:hover, .upload-zone.dragover {
+    border-color: var(--blue);
+    background: rgba(0,200,255,0.06);
+    box-shadow: inset 0 0 30px rgba(0,200,255,0.05);
+  }
+
+  .upload-zone input[type=file] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+
+  .upload-zone-icon { font-size: 2.5rem; margin-bottom: 10px; display: block; animation: float 3s ease-in-out infinite; }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+
+  .upload-zone p { font-family: 'Rajdhani', sans-serif; font-size: 0.85rem; color: var(--muted); font-weight: 600; }
+  .upload-zone p strong { color: var(--blue); display: block; margin-bottom: 4px; font-size: 1rem; font-family: 'Russo One', sans-serif; }
+
+  /* SELECTED FILES */
+  .selected-files { margin-bottom: 16px; max-height: 120px; overflow-y: auto; }
+
+  .selected-file-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 12px;
+    background: rgba(0,200,255,0.05);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--purple);
+    margin-bottom: 4px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  .selected-file-item span:first-child { color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70%; }
+
+  /* PROGRESS */
+  .progress-wrap { display: none; margin-top: 16px; }
+
+  .progress-label {
+    font-family: 'Russo One', sans-serif;
+    font-size: 0.65rem;
+    color: var(--blue);
+    letter-spacing: 0.1em;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .progress-bar-bg {
+    height: 6px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    clip-path: polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%);
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--blue) 0%, var(--purple) 100%);
+    width: 0%;
+    transition: width 0.3s ease;
+    box-shadow: 0 0 10px var(--blue);
+  }
+
+  /* PLAYER MODAL */
+  .player-modal {
+    max-width: 900px;
+    background: #000;
+    border-color: var(--border-bright);
+    padding: 0;
+    overflow: hidden;
+    clip-path: polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 24px 100%, 0 calc(100% - 24px));
+  }
+
+  .player-modal video {
+    width: 100%;
+    max-height: 65vh;
+    display: block;
+    background: #000;
+  }
+
+  .player-info {
+    padding: 18px 24px;
+    background: linear-gradient(135deg, var(--surface) 0%, var(--bg) 100%);
+    border-top: 2px solid var(--border-bright);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .player-title {
+    font-family: 'Russo One', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 0.04em;
+    color: #fff;
+  }
+
+  .player-meta {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--muted);
+    margin-top: 3px;
+    letter-spacing: 0.05em;
+  }
+
+  .player-close-btn {
+    position: absolute;
+    top: 12px; right: 12px;
+    background: rgba(0,0,0,0.8);
+    border: 1px solid var(--border-bright);
+    color: #fff;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.2s;
+    z-index: 10;
+    clip-path: polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%);
+  }
+
+  .player-close-btn:hover { background: var(--blue); border-color: var(--blue); color: #000; }
+
+  /* NOTIFICATION */
+  .notif {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    background: linear-gradient(135deg, var(--surface) 0%, var(--surface2) 100%);
+    border: 1px solid var(--border-bright);
+    border-left: 4px solid var(--blue);
+    padding: 14px 20px;
+    font-family: 'Russo One', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    color: var(--text);
+    z-index: 9000;
+    animation: notifIn 0.3s ease both;
+    max-width: 320px;
+    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+    box-shadow: 0 0 30px rgba(0,150,255,0.2);
+  }
+
+  .notif.success { border-left-color: var(--green); box-shadow: 0 0 30px rgba(0,255,136,0.2); }
+  .notif.error { border-left-color: #ff4444; box-shadow: 0 0 30px rgba(255,0,0,0.2); color: #ff8888; }
+
+  @keyframes notifIn {
+    from { opacity: 0; transform: translateX(30px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 20px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    position: relative;
+    z-index: 1;
+  }
+
+  footer span { color: var(--blue); }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg2); }
+  ::-webkit-scrollbar-thumb { background: var(--border-bright); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--blue); }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo-wrap">
+    <div class="logo-icon">🎮</div>
+    <div>
+      <div class="logo">FORTVID</div>
+      <div class="logo-sub">Vidéothèque privée</div>
+    </div>
+  </div>
+  <button class="btn btn-upload" id="openUploadBtn">⊕ IMPORTER VIDÉO</button>
+</header>
+
+<!-- SEASON BAR -->
+<div class="season-bar">
+  <div class="season-badge">CHAPITRE 1 — SAISON CRÉATEUR</div>
+  <div class="xp-wrap">
+    <span class="xp-label">XP VIDÉO</span>
+    <div class="xp-bar"><div class="xp-fill" id="xpFill"></div></div>
+    <span class="xp-val" id="xpVal">0 XP</span>
+  </div>
+</div>
+
+<main>
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <span class="stat-icon">🎬</span>
+      <div class="stat-value" id="statCount">0</div>
+      <div class="stat-label">Vidéos uploadées</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">💾</span>
+      <div class="stat-value" id="statSize">0 MB</div>
+      <div class="stat-label">Stockage utilisé</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">▶️</span>
+      <div class="stat-value" id="statViews">0</div>
+      <div class="stat-label">Lectures</div>
+    </div>
+  </div>
+
+  <!-- GRID -->
+  <div class="section-header">
+    <div class="section-title">ITEM SHOP VIDÉO</div>
+    <div class="section-count" id="sectionCount">0 ITEMS</div>
+  </div>
+
+  <div class="video-grid" id="videoGrid">
+    <div class="empty-state">
+      <h3>INVENTAIRE VIDE</h3>
+      <p>Clique sur "IMPORTER VIDÉO" pour ajouter ta première vidéo à l'Item Shop</p>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div>FORTVID © 2025 — Plateforme vidéo privée</div>
+  <div>Session active — <span>fichiers lourds supportés</span></div>
+</footer>
+
+<!-- ═══ MODAL UPLOAD ═══ -->
+<div class="modal-backdrop" id="uploadModal">
+  <div class="modal">
+    <button class="modal-close" id="closeUpload">✕</button>
+    <div class="modal-icon">🔐</div>
+    <div class="modal-title">ACCÈS CRÉATEUR</div>
+    <div class="modal-sub">// Zone réservée au créateur</div>
+
+    <div id="authSection">
+      <div class="form-group">
+        <label>Mot de passe</label>
+        <input type="password" id="passwordInput" placeholder="Entrez le code secret…" />
+      </div>
+      <button class="btn btn-confirm" id="authBtn">🔓 DÉVERROUILLER</button>
+    </div>
+
+    <div id="uploadSection" style="display:none">
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" id="fileInput" accept="video/*" multiple />
+        <span class="upload-zone-icon">📽️</span>
+        <p><strong>GLISSE TA VIDÉO ICI</strong>MP4, MOV, AVI, MKV, WebM… fichiers lourds OK</p>
+      </div>
+
+      <div class="selected-files" id="selectedFiles"></div>
+
+      <div class="form-group">
+        <label>Titre personnalisé (optionnel)</label>
+        <input type="text" id="videoTitle" placeholder="Nom de la vidéo…" />
+      </div>
+
+      <button class="btn btn-confirm" id="uploadBtn">⊕ AJOUTER À L'ITEM SHOP</button>
+
+      <div class="progress-wrap" id="progressWrap">
+        <div class="progress-label">
+          <span id="progressText">CHARGEMENT…</span>
+          <span id="progressPct"></span>
+        </div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL LECTEUR ═══ -->
+<div class="modal-backdrop" id="playerModal">
+  <div class="modal player-modal">
+    <button class="player-close-btn" id="closePlayer">✕</button>
+    <video id="videoPlayer" controls preload="metadata"></video>
+    <div class="player-info">
+      <div>
+        <div class="player-title" id="playerTitle">—</div>
+        <div class="player-meta" id="playerMeta">—</div>
+      </div>
+      <button class="btn btn-danger" id="deleteVideoBtn">⊖ SUPPRIMER</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const PASS = "1290";
+  let videos = [];
+  let currentVideoIndex = -1;
+  let totalViews = 0;
+  let pendingFiles = [];
+  let authed = false;
+
+  function getRarity(bytes) {
+    if (bytes < 50 * 1024 * 1024) return 'common';
+    if (bytes < 500 * 1024 * 1024) return 'rare';
+    if (bytes < 2 * 1024 * 1024 * 1024) return 'epic';
+    return 'legendary';
+  }
+
+  function formatSize(bytes) {
+    if (!bytes) return '—';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
+  }
+
+  function formatDate(ts) {
+    return new Date(ts).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
+  function formatDuration(secs) {
+    if (!secs || isNaN(secs)) return '';
+    const h = Math.floor(secs / 3600);
+    const m = Math.floor((secs % 3600) / 60);
+    const s = Math.floor(secs % 60);
+    if (h > 0) return `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    return `${m}:${String(s).padStart(2,'0')}`;
+  }
+
+  function notify(msg, type = 'success') {
+    const el = document.createElement('div');
+    el.className = `notif ${type}`;
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 3500);
+  }
+
+  function updateStats() {
+    document.getElementById('statCount').textContent = videos.length;
+    const total = videos.reduce((a, v) => a + (v.size || 0), 0);
+    document.getElementById('statSize').textContent = formatSize(total);
+    document.getElementById('statViews').textContent = totalViews;
+    document.getElementById('sectionCount').textContent = `${videos.length} ITEMS`;
+    // XP bar based on video count
+    const xp = videos.length * 1000 + totalViews * 100;
+    const pct = Math.min((xp % 5000) / 5000 * 100, 100);
+    document.getElementById('xpFill').style.width = pct + '%';
+    document.getElementById('xpVal').textContent = xp.toLocaleString() + ' XP';
+  }
+
+  function renderGrid() {
+    const grid = document.getElementById('videoGrid');
+    updateStats();
+
+    if (videos.length === 0) {
+      grid.innerHTML = `<div class="empty-state"><h3>INVENTAIRE VIDE</h3><p>Clique sur "IMPORTER VIDÉO" pour ajouter ta première vidéo à l'Item Shop</p></div>`;
+      return;
+    }
+
+    grid.innerHTML = videos.map((v, i) => {
+      const rarity = getRarity(v.size);
+      return `
+      <div class="video-card rarity-${rarity}" onclick="openPlayer(${i})">
+        <div class="rarity-stripe"></div>
+        <div class="card-shine"></div>
+        <div class="thumb-wrap">
+          ${v.thumb
+            ? `<img class="thumb-img" src="${v.thumb}" alt="${v.title}">`
+            : `<div class="thumb-placeholder"><svg viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg></div>`
+          }
+          <div class="play-overlay">
+            <div class="play-btn-circle">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+            </div>
+          </div>
+          ${v.duration ? `<div class="duration-badge">${v.duration}</div>` : ''}
+          <div class="size-badge">${formatSize(v.size)}</div>
+        </div>
+        <div class="card-body">
+          <div class="card-title">${v.title}</div>
+          <div class="card-meta">
+            <span class="card-date">${formatDate(v.date)}</span>
+            <span class="card-type-badge">${rarity.toUpperCase()}</span>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // AUTH
+  document.getElementById('authBtn').addEventListener('click', () => {
+    if (document.getElementById('passwordInput').value === PASS) {
+      authed = true;
+      document.getElementById('authSection').style.display = 'none';
+      document.getElementById('uploadSection').style.display = 'block';
+    } else {
+      notify('❌ Code incorrect ! Accès refusé.', 'error');
+      document.getElementById('passwordInput').value = '';
+      document.getElementById('passwordInput').focus();
+    }
+  });
+
+  document.getElementById('passwordInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('authBtn').click();
+  });
+
+  // MODAL
+  document.getElementById('openUploadBtn').addEventListener('click', () => {
+    document.getElementById('uploadModal').classList.add('open');
+    if (!authed) setTimeout(() => document.getElementById('passwordInput').focus(), 100);
+  });
+
+  document.getElementById('closeUpload').addEventListener('click', closeUploadModal);
+  document.getElementById('uploadModal').addEventListener('click', e => {
+    if (e.target === document.getElementById('uploadModal')) closeUploadModal();
+  });
+
+  function closeUploadModal() {
+    document.getElementById('uploadModal').classList.remove('open');
+    document.getElementById('progressWrap').style.display = 'none';
+    document.getElementById('progressFill').style.width = '0%';
+  }
+
+  // FILE SELECTION
+  const fileInput = document.getElementById('fileInput');
+  const uploadZone = document.getElementById('uploadZone');
+
+  fileInput.addEventListener('change', () => {
+    pendingFiles = [...fileInput.files].filter(f => f.type.startsWith('video/'));
+    renderSelectedFiles();
+  });
+
+  uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+  uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+  uploadZone.addEventListener('drop', e => {
+    e.preventDefault();
+    uploadZone.classList.remove('dragover');
+    pendingFiles = [...e.dataTransfer.files].filter(f => f.type.startsWith('video/'));
+    renderSelectedFiles();
+  });
+
+  function renderSelectedFiles() {
+    const container = document.getElementById('selectedFiles');
+    if (!pendingFiles.length) { container.innerHTML = ''; return; }
+    container.innerHTML = pendingFiles.map(f =>
+      `<div class="selected-file-item"><span>${f.name}</span><span>${formatSize(f.size)}</span></div>`
+    ).join('');
+  }
+
+  // ADD
+  document.getElementById('uploadBtn').addEventListener('click', () => {
+    if (!pendingFiles.length) { notify('⚠️ Sélectionne d\'abord un fichier vidéo', 'error'); return; }
+    processNextFile(0);
+  });
+
+  function processNextFile(i) {
+    if (i >= pendingFiles.length) {
+      document.getElementById('progressWrap').style.display = 'none';
+      closeUploadModal();
+      pendingFiles = [];
+      document.getElementById('selectedFiles').innerHTML = '';
+      fileInput.value = '';
+      document.getElementById('videoTitle').value = '';
+      notify(`✅ ${i} vidéo(s) ajoutée(s) à l'Item Shop !`, 'success');
+      renderGrid();
+      return;
+    }
+
+    const file = pendingFiles[i];
+    const pw = document.getElementById('progressWrap');
+    const fill = document.getElementById('progressFill');
+    const ptext = document.getElementById('progressText');
+
+    pw.style.display = 'block';
+    fill.style.width = '20%';
+    ptext.textContent = `TRAITEMENT : ${file.name}`;
+
+    const objectUrl = URL.createObjectURL(file);
+    const titleInput = document.getElementById('videoTitle').value.trim();
+    const title = (i === 0 && titleInput) ? titleInput : file.name.replace(/\.[^.]+$/, '');
+    const fileType = (file.type.split('/')[1] || 'video').toUpperCase();
+
+    const tmpVid = document.createElement('video');
+    tmpVid.src = objectUrl;
+    tmpVid.muted = true;
+    tmpVid.preload = 'metadata';
+    fill.style.width = '50%';
+
+    const addAndNext = (thumb) => {
+      videos.unshift({ id: Date.now(), title, url: objectUrl, thumb, size: file.size, type: fileType, duration: formatDuration(tmpVid.duration), date: Date.now() });
+      fill.style.width = '100%';
+      setTimeout(() => { fill.style.width = '0%'; processNextFile(i + 1); }, 250);
+    };
+
+    tmpVid.addEventListener('seeked', () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 320; canvas.height = 180;
+        canvas.getContext('2d').drawImage(tmpVid, 0, 0, 320, 180);
+        addAndNext(canvas.toDataURL('image/jpeg', 0.75));
+      } catch { addAndNext(null); }
+    }, { once: true });
+
+    tmpVid.addEventListener('error', () => addAndNext(null), { once: true });
+    tmpVid.addEventListener('loadedmetadata', () => { tmpVid.currentTime = Math.min(1, tmpVid.duration * 0.1); }, { once: true });
+  }
+
+  // PLAYER
+  function openPlayer(index) {
+    currentVideoIndex = index;
+    const v = videos[index];
+    document.getElementById('videoPlayer').src = v.url;
+    document.getElementById('playerTitle').textContent = v.title;
+    document.getElementById('playerMeta').textContent = `${v.type} · ${formatSize(v.size)} · ${formatDate(v.date)}`;
+    document.getElementById('playerModal').classList.add('open');
+    document.getElementById('videoPlayer').play().catch(() => {});
+    totalViews++;
+    updateStats();
+  }
+
+  document.getElementById('closePlayer').addEventListener('click', closePlayer);
+  document.getElementById('playerModal').addEventListener('click', e => {
+    if (e.target === document.getElementById('playerModal')) closePlayer();
+  });
+
+  function closePlayer() {
+    const p = document.getElementById('videoPlayer');
+    p.pause(); p.src = '';
+    document.getElementById('playerModal').classList.remove('open');
+  }
+
+  // DELETE
+  document.getElementById('deleteVideoBtn').addEventListener('click', () => {
+    if (currentVideoIndex < 0 || !confirm('Éliminer cette vidéo de l\'inventaire ?')) return;
+    URL.revokeObjectURL(videos[currentVideoIndex].url);
+    videos.splice(currentVideoIndex, 1);
+    currentVideoIndex = -1;
+    closePlayer();
+    renderGrid();
+    notify('🗑️ Vidéo supprimée de l\'inventaire', 'success');
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { closePlayer(); closeUploadModal(); }
+  });
+
+  renderGrid();
+</script>
+</body>
+</html>
